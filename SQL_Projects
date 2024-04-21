@@ -1,0 +1,332 @@
+VIEW `courseinstructor` AS
+    SELECT 
+        `course_table`.`courseid` AS `courseid`,
+        `course_table`.`coursename` AS `coursename`,
+        `course_table`.`coursebranch` AS `coursebranch`,
+        `instructor_table`.`Insfirstname` AS `insfirstname`,
+        `instructor_table`.`Inslastname` AS `inslastname`
+    FROM
+        (`course_table`
+        JOIN `instructor_table`)
+    WHERE
+        (`course_table`.`coursebranch` = `instructor_table`.`Insbranch`)
+
+VIEW `coursenotenrolled` AS
+    SELECT DISTINCT
+        `student_table`.`studentid` AS `student`
+    FROM
+        (`student_table`
+        LEFT JOIN `enrollment_table` ON ((`student_table`.`studentid` = `enrollment_table`.`studentid`)))
+    WHERE
+        (`enrollment_table`.`studentid` IS NULL)
+
+
+VIEW `maxcoursebystudent` AS
+    SELECT 
+        `enrollment_table`.`studentid` AS `student`,
+        COUNT(`enrollment_table`.`courseid`) AS `course`
+    FROM
+        `enrollment_table`
+    GROUP BY `student`
+    ORDER BY `course` DESC
+
+
+VIEW `maxfeesbystudent` AS
+select
+`enrollment_table`.`studentid` AS `student`,sum(`course_table`.`coursefees`) AS `fees`,
+rank() OVER (ORDER BY sum(`course_table`.`coursefees`) desc )  AS `Rank`
+from
+(`course_table` join `enrollment_table`)
+group by `enrollment_table`.`studentid`
+
+VIEW `studentcourse` AS
+    SELECT 
+        `student_table`.`studentid` AS `studentid`,
+        `student_table`.`firstname` AS `firstname`,
+        `student_table`.`lastname` AS `lastname`,
+        `student_table`.`email` AS `email`,
+        `student_table`.`courseid` AS `courseid`,
+        `student_table`.`yearofjoin` AS `yearofjoin`
+    FROM
+        `student_table`
+    ORDER BY `student_table`.`studentid`
+
+
+VIEW `users_enrolled` AS
+    SELECT 
+        `enrollment_table`.`studentid` AS `studentid`,
+        COUNT('enrollment_table\'studentid') AS `courses`
+    FROM
+        `enrollment_table`
+    GROUP BY `enrollment_table`.`studentid`
+    ORDER BY `courses` DESC
+
+
+------------------------------
+
+VIEW `01_makingprofit` AS
+    SELECT 
+        `dataset`.`Row ID` AS `Row ID`,
+        `dataset`.`Order ID` AS `Order ID`,
+        `dataset`.`Order Date` AS `Order Date`,
+        `dataset`.`Ship Date` AS `Ship Date`,
+        `dataset`.`Ship Mode` AS `Ship Mode`,
+        `dataset`.`Customer ID` AS `Customer ID`,
+        `dataset`.`Customer Name` AS `Customer Name`,
+        `dataset`.`Segment` AS `Segment`,
+        `dataset`.`Country` AS `Country`,
+        `dataset`.`City` AS `City`,
+        `dataset`.`State` AS `State`,
+        `dataset`.`Postal Code` AS `Postal Code`,
+        `dataset`.`Region` AS `Region`,
+        `dataset`.`Product ID` AS `Product ID`,
+        `dataset`.`Category` AS `Category`,
+        `dataset`.`Sub-Category` AS `Sub-Category`,
+        `dataset`.`Product Name` AS `Product Name`,
+        `dataset`.`Sales` AS `Sales`,
+        `dataset`.`Quantity` AS `Quantity`,
+        `dataset`.`Discount` AS `Discount`,
+        `dataset`.`Profit` AS `Profit`
+    FROM
+        `dataset`
+    WHERE
+        (`dataset`.`Profit` > 0)
+    ORDER BY `dataset`.`Profit`
+
+
+VIEW `02_makingprofitwithdiscount` AS
+    SELECT 
+        `dataset`.`Row ID` AS `Row ID`,
+        `dataset`.`Order ID` AS `Order ID`,
+        `dataset`.`Order Date` AS `Order Date`,
+        `dataset`.`Ship Date` AS `Ship Date`,
+        `dataset`.`Ship Mode` AS `Ship Mode`,
+        `dataset`.`Customer ID` AS `Customer ID`,
+        `dataset`.`Customer Name` AS `Customer Name`,
+        `dataset`.`Segment` AS `Segment`,
+        `dataset`.`Country` AS `Country`,
+        `dataset`.`City` AS `City`,
+        `dataset`.`State` AS `State`,
+        `dataset`.`Postal Code` AS `Postal Code`,
+        `dataset`.`Region` AS `Region`,
+        `dataset`.`Product ID` AS `Product ID`,
+        `dataset`.`Category` AS `Category`,
+        `dataset`.`Sub-Category` AS `Sub-Category`,
+        `dataset`.`Product Name` AS `Product Name`,
+        `dataset`.`Sales` AS `Sales`,
+        `dataset`.`Quantity` AS `Quantity`,
+        `dataset`.`Discount` AS `Discount`,
+        `dataset`.`Profit` AS `Profit`
+    FROM
+        `dataset`
+    WHERE
+        ((`dataset`.`Profit` > 0)
+            AND (`dataset`.`Discount` >= 0.5))
+    ORDER BY `dataset`.`Profit`
+
+VIEW `03_uniquecid` AS
+    SELECT DISTINCT
+        `dataset`.`Customer ID` AS `Customer ID`
+    FROM
+        `dataset`
+    ORDER BY `dataset`.`Customer ID`
+
+
+VIEW `04_cat_subcat_uniquecid` AS
+    SELECT DISTINCT
+        `dataset`.`Customer ID` AS `Customer ID`,
+        `dataset`.`Category` AS `category`,
+        `dataset`.`Sub-Category` AS `subcategory`
+    FROM
+        `dataset`
+    ORDER BY `dataset`.`Customer ID`
+
+VIEW `05_profitcity` AS
+    SELECT 
+        SUM(`dataset`.`Profit`) AS `profit`,
+        `dataset`.`City` AS `city`
+    FROM
+        `dataset`
+    WHERE
+        (`dataset`.`Profit` > 0)
+    GROUP BY `dataset`.`City`
+    ORDER BY `profit` DESC
+
+VIEW `06_duplicatetable` AS
+    SELECT 
+        `dataset`.`Row ID` AS `Row ID`,
+        `dataset`.`Order ID` AS `Order ID`,
+        `dataset`.`Order Date` AS `Order Date`,
+        `dataset`.`Ship Date` AS `Ship Date`,
+        `dataset`.`Ship Mode` AS `Ship Mode`,
+        `dataset`.`Customer ID` AS `Customer ID`,
+        `dataset`.`Customer Name` AS `Customer Name`,
+        `dataset`.`Segment` AS `Segment`,
+        `dataset`.`Country` AS `Country`,
+        `dataset`.`City` AS `City`,
+        `dataset`.`State` AS `State`,
+        `dataset`.`Postal Code` AS `Postal Code`,
+        `dataset`.`Region` AS `Region`,
+        `dataset`.`Product ID` AS `Product ID`,
+        `dataset`.`Category` AS `Category`,
+        `dataset`.`Sub-Category` AS `Sub-Category`,
+        `dataset`.`Product Name` AS `Product Name`,
+        `dataset`.`Sales` AS `Sales`,
+        `dataset`.`Quantity` AS `Quantity`,
+        `dataset`.`Discount` AS `Discount`,
+        `dataset`.`Profit` AS `Profit`
+    FROM
+        `dataset`
+
+VIEW `07_duplicatetabledeletediscount` AS
+    SELECT 
+        `dataset`.`Row ID` AS `Row ID`,
+        `dataset`.`Order ID` AS `Order ID`,
+        `dataset`.`Order Date` AS `Order Date`,
+        `dataset`.`Ship Date` AS `Ship Date`,
+        `dataset`.`Ship Mode` AS `Ship Mode`,
+        `dataset`.`Customer ID` AS `Customer ID`,
+        `dataset`.`Customer Name` AS `Customer Name`,
+        `dataset`.`Segment` AS `Segment`,
+        `dataset`.`Country` AS `Country`,
+        `dataset`.`City` AS `City`,
+        `dataset`.`State` AS `State`,
+        `dataset`.`Postal Code` AS `Postal Code`,
+        `dataset`.`Region` AS `Region`,
+        `dataset`.`Product ID` AS `Product ID`,
+        `dataset`.`Category` AS `Category`,
+        `dataset`.`Sub-Category` AS `Sub-Category`,
+        `dataset`.`Product Name` AS `Product Name`,
+        `dataset`.`Sales` AS `Sales`,
+        `dataset`.`Quantity` AS `Quantity`,
+        `dataset`.`Discount` AS `Discount`,
+        `dataset`.`Profit` AS `Profit`
+    FROM
+        `dataset`
+    WHERE
+        (`dataset`.`Discount` > 0.3)
+
+VIEW `08_categorysale` AS
+    SELECT 
+        `dataset`.`Category` AS `category`,
+        SUM(`dataset`.`Sales`) AS `sale`
+    FROM
+        `dataset`
+    GROUP BY `dataset`.`Category`
+    ORDER BY `sale` DESC
+
+VIEW `09_shipmodeprofit` AS
+    SELECT 
+        `dataset`.`Ship Mode` AS `shipmode`,
+        SUM(`dataset`.`Profit`) AS `profit`
+    FROM
+        `dataset`
+    WHERE
+        (`dataset`.`Profit` > 0)
+    GROUP BY `shipmode`
+    ORDER BY `profit` DESC
+
+VIEW `10_subcategoryquantity` AS
+    SELECT 
+        `dataset`.`Sub-Category` AS `subcategory`,
+        SUM(`dataset`.`Quantity`) AS `quantity`
+    FROM
+        `dataset`
+    GROUP BY `subcategory`
+    ORDER BY `quantity` DESC
+
+VIEW `11_particularrank` AS with `ranked_sales` as 
+(select `dataset`.`City` AS `city`,`dataset`.`Sales` AS `sale`,rank() OVER (ORDER BY `dataset`.`Sales` desc )  AS `sale_rank`
+from `dataset`)
+select `ranked_sales`.`city` AS `city`,`ranked_sales`.`sale` AS `sale`,`ranked_sales`.`sale_rank` AS `sale_rank` from `ranked_sales`
+where (`ranked_sales`.`sale_rank` between 21 and 31)
+
+VIEW `12_catsubcat` AS
+    SELECT 
+        `dataset`.`Category` AS `category`,
+        `dataset`.`Sub-Category` AS `subcategory`,
+        CONCAT(`dataset`.`Category`,
+                ' ',
+                `dataset`.`Sub-Category`) AS `catsub`
+    FROM
+        `dataset`
+
+VIEW `13_datashipped` AS
+    SELECT 
+        `dataset`.`Ship Date` AS `sdate`,
+        `dataset`.`Product ID` AS `product`
+    FROM
+        `dataset`
+    WHERE
+        (CAST(`dataset`.`Ship Date` AS DATE) BETWEEN '2015-03-08' AND '2017-10-01')
+
+VIEW `14_mostcustomerid` AS
+    SELECT 
+        `dataset`.`Customer ID` AS `customerid`,
+        COUNT(`dataset`.`Customer ID`) AS `count`
+    FROM
+        `dataset`
+    GROUP BY `customerid`
+    ORDER BY `count` DESC
+
+VIEW `15_customernamelength` AS
+    SELECT 
+        `dataset`.`Customer Name` AS `customername`,
+        LENGTH(`dataset`.`Customer Name`) AS `namelen`
+    FROM
+        `dataset`
+    GROUP BY `customername`
+    ORDER BY 'namelen'
+
+VIEW `16_uniqueorders` AS
+    SELECT DISTINCT
+        `dataset`.`Order ID` AS `OrderID`
+    FROM
+        `dataset`
+    ORDER BY `dataset`.`Order ID`
+
+VIEW `17_orderidmostsale` AS
+    SELECT 
+        `dataset`.`Order ID` AS `orderid`,
+        SUM(`dataset`.`Sales`) AS `sale`
+    FROM
+        `dataset`
+    GROUP BY `orderid`
+    ORDER BY `sale` DESC
+
+VIEW `18_rankordersale` AS select `dataset`.`City` AS `city`,`dataset`.`Sales` AS `sale`,
+rank() OVER (PARTITION BY 'dataset`.`City' ORDER BY `dataset`.`Sales` desc )  AS `salerank`
+from `dataset`
+
+
+
+VIEW `19_sumsalebydate` AS
+    SELECT 
+        `dataset`.`Order Date` AS `orderdate`,
+        SUM(`dataset`.`Sales`) AS `sale`
+    FROM
+        `dataset`
+    GROUP BY `orderdate`
+    ORDER BY `sale` DESC
+
+
+VIEW `20_productidsale` AS
+    SELECT 
+        `dataset`.`Product ID` AS `productid`,
+        SUM(`dataset`.`Sales`) AS `sale`
+    FROM
+        `dataset`
+    GROUP BY `productid`
+    ORDER BY `sale` DESC
+
+-----------------------------
+
+
+
+
+
+
+
+
+
+
